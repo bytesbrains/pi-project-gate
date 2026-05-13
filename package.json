@@ -1,0 +1,43 @@
+{
+  "name": "pi-project-gate",
+  "version": "1.0.0",
+  "description": "Project orchestration gate for AI agents — structured issues, WIP limits, dependency blocking, and auto-generated release notes.",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "governance",
+    "project-management",
+    "release-notes",
+    "issue-tracking"
+  ],
+  "author": "nandal <nandal@users.noreply.github.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nandal/pi-ext",
+    "directory": "project-gate"
+  },
+  "homepage": "https://github.com/nandal/pi-ext/tree/main/project-gate",
+  "bugs": {
+    "url": "https://github.com/nandal/pi-ext/issues"
+  },
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "AGENTS.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  }
+}
