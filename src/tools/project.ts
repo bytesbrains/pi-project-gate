@@ -13,7 +13,7 @@ export const checkTool = {
   async execute(_id: string, params: any, _s: any, _u: any, ctx: ExtensionContext) {
     const config = loadConfig(ctx.cwd); const opts = resolveGitea(ctx.cwd);
     const issueId = params.issue_id.replace(/^#/, "");
-    const r = giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
+    const r = await giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
     if (!r.ok || !r.data) return { content: [{ type: "text", text: `Issue #${issueId} not found.` }], isError: true, details: {} };
     const issue = r.data as Record<string, unknown>;
     const lines: string[] = []; const issues: string[] = [];
@@ -27,7 +27,7 @@ export const checkTool = {
     const deps = parseDependencies(body, config);
     if (deps.length > 0) {
       const blocked: string[] = [];
-      for (const dep of deps) { const dr = giteaApi(`/issues/${dep}`, "GET", null, opts, ctx.cwd); if (dr.ok && (dr.data as any)?.state === "open") blocked.push(dep); }
+      for (const dep of deps) { const dr = await giteaApi(`/issues/${dep}`, "GET", null, opts, ctx.cwd); if (dr.ok && (dr.data as any)?.state === "open") blocked.push(dep); }
       if (blocked.length > 0) issues.push(`🔒 Blocked by: #${blocked.join(", #")}`);
       else lines.push("   Dependencies: ✅");
     }
@@ -46,7 +46,7 @@ export const startTool = {
   async execute(_id: string, params: any, _s: any, _u: any, ctx: ExtensionContext) {
     const config = loadConfig(ctx.cwd); const opts = resolveGitea(ctx.cwd);
     const issueId = params.issue_id.replace(/^#/, "");
-    const r = giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
+    const r = await giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
     if (!r.ok || !r.data) return { content: [{ type: "text", text: `Issue #${issueId} not found.` }], isError: true, details: {} };
     const issue = r.data as Record<string, unknown>;
     const body = (issue.body as string) || "";
@@ -55,10 +55,10 @@ export const startTool = {
     const deps = parseDependencies(body, config);
     if (deps.length > 0) {
       const blocked: string[] = [];
-      for (const dep of deps) { const dr = giteaApi(`/issues/${dep}`, "GET", null, opts, ctx.cwd); if (dr.ok && (dr.data as any)?.state === "open") blocked.push(dep); }
+      for (const dep of deps) { const dr = await giteaApi(`/issues/${dep}`, "GET", null, opts, ctx.cwd); if (dr.ok && (dr.data as any)?.state === "open") blocked.push(dep); }
       if (blocked.length > 0) return { content: [{ type: "text", text: `🔒 Blocked: #${blocked.join(", #")}` }], isError: true, details: {} };
     }
-    const wipR = giteaApi("/pulls?state=open&limit=100", "GET", null, opts, ctx.cwd);
+    const wipR = await giteaApi("/pulls?state=open&limit=100", "GET", null, opts, ctx.cwd);
     const prs = Array.isArray(wipR.data) ? wipR.data : [];
     const author = (issue.user as any)?.login || "factory";
     const currentWip = prs.filter((p: any) => p.user?.login === author).length;
@@ -75,13 +75,13 @@ export const statusTool = {
   async execute(_id: string, _p: any, _s: any, _u: any, ctx: ExtensionContext) {
     const config = loadConfig(ctx.cwd); const opts = resolveGitea(ctx.cwd);
     const lines = ["📊 Project Status", ""];
-    const wipR = giteaApi("/pulls?state=open&limit=100", "GET", null, opts, ctx.cwd);
+    const wipR = await giteaApi("/pulls?state=open&limit=100", "GET", null, opts, ctx.cwd);
     const prs = Array.isArray(wipR.data) ? wipR.data : [];
     const byAuthor: Record<string, number> = {};
     for (const pr of prs) { const a = (pr as any).user?.login || "?"; byAuthor[a] = (byAuthor[a] || 0) + 1; }
     lines.push(`🏗 WIP: ${prs.length} open PRs (limit: ${config.maxWip})`);
     for (const [a, c] of Object.entries(byAuthor).sort(([, a], [, b]) => b - a)) lines.push(`   ${a}: ${c}/${config.maxWip} ${c >= config.maxWip ? "⚠️" : "✅"}`);
-    const issuesR = giteaApi("/issues?state=open&limit=10", "GET", null, opts, ctx.cwd);
+    const issuesR = await giteaApi("/issues?state=open&limit=10", "GET", null, opts, ctx.cwd);
     if (issuesR.ok && Array.isArray(issuesR.data)) {
       const assigned = (issuesR.data as any[]).filter((i: any) => i.assignee).slice(0, 5);
       if (assigned.length > 0) { lines.push("", "In Progress:"); for (const i of assigned) lines.push(`   - #${i.number} [${i.assignee?.login}] ${i.title}`); }

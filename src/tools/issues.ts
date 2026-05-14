@@ -51,7 +51,7 @@ export const createTool = {
     if (params.milestone) payload.milestone = params.milestone;
     if (params.assignee) payload.assignee = params.assignee;
 
-    const r = giteaApi("/issues", "POST", payload, opts, ctx.cwd);
+    const r = await giteaApi("/issues", "POST", payload, opts, ctx.cwd);
     if (!r.ok || !r.data) {
       return {
         content: [{ type: "text", text: `❌ Failed to create issue: ${r.error || "unknown error"}` }],
@@ -101,7 +101,7 @@ export const updateTool = {
     const issueId = String(params.issue_id).replace(/^#/, "");
 
     // Fetch current issue to verify it exists
-    const current = giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
+    const current = await giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
     if (!current.ok || !current.data) {
       return {
         content: [{ type: "text", text: `❌ Issue #${issueId} not found.` }],
@@ -144,7 +144,7 @@ export const updateTool = {
       };
     }
 
-    const r = giteaApi(`/issues/${issueId}`, "PATCH", payload, opts, ctx.cwd);
+    const r = await giteaApi(`/issues/${issueId}`, "PATCH", payload, opts, ctx.cwd);
     if (!r.ok || !r.data) {
       return {
         content: [{ type: "text", text: `❌ Failed to update issue: ${r.error || "unknown error"}` }],
@@ -201,7 +201,7 @@ export const listTool = {
     if (params.assignee) queryParts.push(`assignee=${encodeURIComponent(params.assignee)}`);
     if (params.q) queryParts.push(`q=${encodeURIComponent(params.q)}`);
 
-    const r = giteaApi(`/issues?${queryParts.join("&")}`, "GET", null, opts, ctx.cwd);
+    const r = await giteaApi(`/issues?${queryParts.join("&")}`, "GET", null, opts, ctx.cwd);
     if (!r.ok) {
       return {
         content: [{ type: "text", text: `❌ Failed to list issues: ${r.error || "unknown error"}` }],
@@ -257,7 +257,7 @@ export const getTool = {
     const opts = resolveGitea(ctx.cwd);
     const issueId = String(params.issue_id).replace(/^#/, "");
 
-    const r = giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
+    const r = await giteaApi(`/issues/${issueId}`, "GET", null, opts, ctx.cwd);
     if (!r.ok || !r.data) {
       return {
         content: [{ type: "text", text: `❌ Issue #${issueId} not found.` }],
@@ -289,7 +289,7 @@ export const getTool = {
     // Fetch comments
     const includeComments = params.include_comments !== false;
     if (includeComments) {
-      const cr = giteaApi(
+      const cr = await giteaApi(
         `/issues/${issueId}/comments?limit=20`,
         "GET",
         null,
