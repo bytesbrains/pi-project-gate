@@ -6,6 +6,9 @@ export interface ProjectConfig {
   requiredSections: string[];
   complexityLevels: string[];
   areas: string[];
+  issueLabels: string[];
+  issueCreateRequireComplexity: boolean;
+  issueCreateRequireArea: boolean;
   releaseNoteGroups: string[];
   releaseNoteIncludeHashes: boolean;
   dependencyPattern: string;
@@ -16,6 +19,9 @@ export const DEFAULT_CONFIG: ProjectConfig = {
   requiredSections: ["## Problem", "## Proposed Solution", "## Acceptance Criteria"],
   complexityLevels: ["trivial", "small", "medium", "large", "epic"],
   areas: [],
+  issueLabels: ["enhancement", "bug", "documentation", "question"],
+  issueCreateRequireComplexity: false,
+  issueCreateRequireArea: false,
   releaseNoteGroups: ["feat", "fix", "perf", "refactor", "chore", "docs", "test", "ci", "build"],
   releaseNoteIncludeHashes: false,
   dependencyPattern: "(?:Depends on|Blocked by|Requires)\\s+#(\\d+)",
@@ -40,6 +46,9 @@ export function loadConfig(cwd: string): ProjectConfig {
       requiredSections: (result["requiredSections"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || DEFAULT_CONFIG.requiredSections,
       complexityLevels: (result["complexityLevels"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || DEFAULT_CONFIG.complexityLevels,
       areas: (result["areas"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || [],
+      issueLabels: (result["issueLabels"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || DEFAULT_CONFIG.issueLabels,
+      issueCreateRequireComplexity: result["issueCreateRequireComplexity"] === "true",
+      issueCreateRequireArea: result["issueCreateRequireArea"] === "true",
       releaseNoteGroups: (result["releaseNoteGroups"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || DEFAULT_CONFIG.releaseNoteGroups,
       releaseNoteIncludeHashes: result["releaseNoteIncludeHashes"] === "true",
       dependencyPattern: (result["dependencyPattern"] as string) || DEFAULT_CONFIG.dependencyPattern,

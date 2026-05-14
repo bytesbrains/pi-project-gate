@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { loadConfig, DEFAULT_CONFIG } from "../config";
 import { validateIssueTemplate, parseDependencies, parseConventionalCommits } from "../validate";
 import { exec } from "../helpers";
+import { createTool, updateTool, listTool, getTool } from "../tools/issues";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -182,5 +183,118 @@ describe("exec helper", () => {
   it("returns not ok for invalid command", () => {
     const r = exec("nonexistent-cmd-xyz-999 2>/dev/null");
     expect(r.ok).toBe(false);
+  });
+});
+
+// ═══════════════════════════════════════
+// New config fields for issue CRUD
+// ═══════════════════════════════════════
+describe("issue config defaults", () => {
+  it("has default issue labels", () => {
+    expect(DEFAULT_CONFIG.issueLabels).toContain("enhancement");
+    expect(DEFAULT_CONFIG.issueLabels).toContain("bug");
+    expect(DEFAULT_CONFIG.issueLabels).toContain("documentation");
+    expect(DEFAULT_CONFIG.issueLabels).toContain("question");
+  });
+
+  it("has create flags defaulting to false", () => {
+    expect(DEFAULT_CONFIG.issueCreateRequireComplexity).toBe(false);
+    expect(DEFAULT_CONFIG.issueCreateRequireArea).toBe(false);
+  });
+
+  it("parses issueLabels from projectrc.yml", () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "project-test-"));
+    fs.writeFileSync(path.join(tmp, ".projectrc.yml"), [
+      'issueLabels: "enhancement,bug,frontend,backend"',
+    ].join("\n"));
+    const config = loadConfig(tmp);
+    expect(config.issueLabels).toEqual(["enhancement", "bug", "frontend", "backend"]);
+    fs.rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it("parses issueCreateRequire flags", () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "project-test-"));
+    fs.writeFileSync(path.join(tmp, ".projectrc.yml"), [
+      "issueCreateRequireComplexity: true",
+      "issueCreateRequireArea: true",
+    ].join("\n"));
+    const config = loadConfig(tmp);
+    expect(config.issueCreateRequireComplexity).toBe(true);
+    expect(config.issueCreateRequireArea).toBe(true);
+    fs.rmSync(tmp, { recursive: true, force: true });
+  });
+});
+
+// ═══════════════════════════════════════
+// Tool definitions
+// ═══════════════════════════════════════
+describe("issue CRUD tool definitions", () => {
+  it("createTool has proper metadata", () => {
+    expect(createTool.name).toBe("project_create_issue");
+    expect(createTool.label).toBe("Create Issue");
+    expect(createTool.description).toContain("Create a new issue");
+    expect(createTool.parameters).toBeDefined();
+  });
+
+  it("updateTool has proper metadata", () => {
+    expect(updateTool.name).toBe("project_update_issue");
+    expect(updateTool.label).toBe("Update Issue");
+    expect(updateTool.description).toContain("Update an existing issue");
+    // issue_id is required, all other fields optional
+    const props = (updateTool.parameters as any)?.properties;
+    expect(props["issue_id"]).toBeDefined();
+    expect(props["title"]).toBeDefined();
+    expect(props["body"]).toBeDefined();
+    expect(props["state"]).toBeDefined();
+    expect(props["labels"]).toBeDefined();
+    expect(props["milestone"]).toBeDefined();
+    expect(props["assignee"]).toBeDefined();
+  });
+
+  it("listTool has proper metadata", () => {
+    expect(listTool.name).toBe("project_list_issues");
+    expect(listTool.label).toBe("List Issues");
+    expect(listTool.description).toContain("Search and list issues");
+    const props = (listTool.parameters as any)?.properties;
+    expect(props["state"]).toBeDefined();
+    expect(props["labels"]).toBeDefined();
+    expect(props["milestone"]).toBeDefined();
+    expect(props["assignee"]).toBeDefined();
+    expect(props["q"]).toBeDefined();
+    expect(props["limit"]).toBeDefined();
+    expect(props["page"]).toBeDefined();
+  });
+
+  it("getTool has proper metadata", () => {
+    expect(getTool.name).toBe("project_get_issue");
+    expect(getTool.label).toBe("Get Issue");
+    expect(getTool.description).toContain("full details");
+    const props = (getTool.parameters as any)?.properties;
+    expect(props["issue_id"]).toBeDefined();
+    expect(props["include_comments"]).toBeDefined();
+  });
+});
+
+// ═══════════════════════════════════════
+// Issue body validation (reused by create/update)
+// ═══════════════════════════════════════
+describe("issue create body validation", () => {
+  const config = {
+    ...DEFAULT_CONFIG,
+    requiredSections: ["## Problem", "## Proposed Solution", "## Acceptance Criteria"],
+  };
+
+  it("accepts a well-formed issue body", () => {
+    const body = "## Problem\nBug exists\n\n## Proposed Solution\nFix it\n\n## Acceptance Criteria\n- [ ] Done";
+    expect(validateIssueTemplate(body, config).ok).toBe(true);
+  });
+
+  it("rejects body missing required sections", () => {
+    const body = "## Problem\nBug exists";
+    const result = validateIssueTemplate(body, config);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.missingSections.length).toBeGreaterThan(0);
+    }
   });
 });
