@@ -1,7 +1,7 @@
 # Project Gate for Pi
 
-[![npm version](https://img.shields.io/npm/v/pi-project-gate)](https://www.npmjs.com/package/pi-project-gate)
-[![license](https://img.shields.io/npm/l/pi-project-gate)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/@bytesbrains/pi-project-gate)](https://www.npmjs.com/package/@bytesbrains/pi-project-gate)
+[![license](https://img.shields.io/npm/l/@bytesbrains/pi-project-gate)](./LICENSE)
 
 > Project orchestration gate for AI agents — structured issues, WIP limits, dependency blocking, and auto-generated release notes. **Agents work from issues, not vibes.**
 
@@ -14,7 +14,7 @@
 ## Install
 
 ```bash
-pi install npm:pi-project-gate
+pi install npm:@bytesbrains/pi-project-gate
 ```
 
 ## Tools
@@ -122,9 +122,9 @@ Example output:
 Install all three gates for full agent governance:
 
 ```bash
-pi install npm:pi-contrib-gate
-pi install npm:pi-review-gate
-pi install npm:pi-project-gate
+pi install npm:@bytesbrains/pi-contrib-gate
+pi install npm:@bytesbrains/pi-review-gate
+pi install npm:@bytesbrains/pi-project-gate
 ```
 
 ## License
