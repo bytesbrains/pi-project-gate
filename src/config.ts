@@ -41,8 +41,9 @@ export function loadConfig(cwd: string): ProjectConfig {
         result[m[1]] = val;
       }
     }
+    const maxWip = parseInt(result["maxWip"] as string);
     return {
-      maxWip: parseInt(result["maxWip"] as string) || DEFAULT_CONFIG.maxWip,
+      maxWip: isNaN(maxWip) ? DEFAULT_CONFIG.maxWip : maxWip,
       requiredSections: (result["requiredSections"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || DEFAULT_CONFIG.requiredSections,
       complexityLevels: (result["complexityLevels"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || DEFAULT_CONFIG.complexityLevels,
       areas: (result["areas"] as string)?.split(",").map(s => s.trim()).filter(Boolean) || [],

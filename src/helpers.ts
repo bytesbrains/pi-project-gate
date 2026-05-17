@@ -1,5 +1,7 @@
 import * as cp from "node:child_process";
 
+// ⚠️ SYNC-MARKER: exec(), resolveGitea(), giteaApi() are duplicated across packages.
+// If changing behavior here, update all copies in: ci-gate, contrib-gate, review-gate, project-gate
 export function exec(cmd: string, cwd?: string): { ok: boolean; stdout: string; stderr: string } {
   try { const r = cp.execSync(cmd, { cwd, encoding: "utf-8", timeout: 30000 }); return { ok: true, stdout: r.trim(), stderr: "" }; }
   catch (e: any) { return { ok: false, stdout: e.stdout?.trim() || "", stderr: e.stderr?.trim() || e.message }; }
@@ -16,7 +18,7 @@ export function resolveGitea(cwd: string): { repo: string; token: string } {
   return { repo, token: credMatch ? credMatch[2] : "" };
 }
 
-export async function giteaApi(path: string, method: string, body: Record<string, unknown> | null, opts: { repo: string; token?: string }, _cwd: string): Promise<{ ok: boolean; data: unknown; error?: string }> {
+export async function giteaApi(path: string, method: string, body: Record<string, unknown> | null, opts: { repo: string; token?: string }, _cwd: string): Promise<{ ok: boolean; data: unknown; error?: string; statusCode?: number }> {
   const base = `http://127.0.0.1:3001/api/v1/repos/${opts.repo}`;
   const url = `${base}${path}`;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -29,11 +31,12 @@ export async function giteaApi(path: string, method: string, body: Record<string
       body: body ? JSON.stringify(body) : undefined,
     });
     const text = await res.text();
+    const statusCode = res.status;
     if (!res.ok) {
       const lines = text.split("\n");
-      return { ok: false, data: null, error: text || lines.slice(0, -1).join("\n") || "API error" };
+      return { ok: false, data: null, statusCode, error: text || lines.slice(0, -1).join("\n") || "API error" };
     }
-    try { return { ok: true, data: JSON.parse(text) }; } catch { return { ok: true, data: text }; }
+    try { return { ok: true, data: JSON.parse(text), statusCode }; } catch { return { ok: true, data: text, statusCode }; }
   } catch (e: any) {
     return { ok: false, data: null, error: e.message || "Network error" };
   }
