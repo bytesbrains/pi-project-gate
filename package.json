@@ -1,7 +1,7 @@
 {
   "name": "@bytesbrains/pi-project-gate",
   "version": "1.2.2",
-  "description": "Project orchestration gate for AI agents \u2014 structured issues, WIP limits, dependency blocking, and auto-generated release notes.",
+  "description": "Project orchestration gate for AI agents — structured issues, WIP limits, dependency blocking, and auto-generated release notes.",
   "keywords": [
     "pi-package",
     "pi-extension",
@@ -13,7 +13,7 @@
   "author": "nandal <nandal@users.noreply.github.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nandal/pi-ext",
+    "url": "git+https://github.com/nandal/pi-ext.git",
     "directory": "project-gate"
   },
   "homepage": "https://github.com/nandal/pi-ext/tree/main/project-gate",
