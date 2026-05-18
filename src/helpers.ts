@@ -21,7 +21,7 @@ export function resolveGitea(cwd: string): { repo: string; token: string } {
 export async function giteaApi(path: string, method: string, body: Record<string, unknown> | null, opts: { repo: string; token?: string }, _cwd: string): Promise<{ ok: boolean; data: unknown; error?: string; statusCode?: number }> {
   const base = `http://127.0.0.1:3001/api/v1/repos/${opts.repo}`;
   const url = `${base}${path}`;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = { "Content-Type": "application/json", "Accept": "application/json" };
   if (opts.token) headers["Authorization"] = `token ${opts.token}`;
 
   try {
@@ -33,8 +33,7 @@ export async function giteaApi(path: string, method: string, body: Record<string
     const text = await res.text();
     const statusCode = res.status;
     if (!res.ok) {
-      const lines = text.split("\n");
-      return { ok: false, data: null, statusCode, error: text || lines.slice(0, -1).join("\n") || "API error" };
+      return { ok: false, data: null, statusCode, error: `Gitea API error: HTTP ${statusCode} ${method} ${path}` };
     }
     try { return { ok: true, data: JSON.parse(text), statusCode }; } catch { return { ok: true, data: text, statusCode }; }
   } catch (e: any) {
