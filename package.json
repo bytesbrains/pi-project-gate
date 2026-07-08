@@ -1,6 +1,6 @@
 {
   "name": "@bytesbrains/pi-project-gate",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Project orchestration gate for AI agents — structured issues, WIP limits, dependency blocking, and auto-generated release notes.",
   "keywords": [
     "pi-package",
