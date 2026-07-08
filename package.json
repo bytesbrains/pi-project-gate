@@ -10,15 +10,14 @@
     "release-notes",
     "issue-tracking"
   ],
-  "author": "nandal <nandal@users.noreply.github.com>",
+  "author": "BytesBrains Pte Ltd (https://bytesbrains.com)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nandal/pi-ext.git",
-    "directory": "project-gate"
+    "url": "git+https://github.com/bytesbrains/pi-project-gate.git"
   },
-  "homepage": "https://github.com/nandal/pi-ext/tree/main/project-gate",
+  "homepage": "https://github.com/bytesbrains/pi-project-gate#readme",
   "bugs": {
-    "url": "https://github.com/nandal/pi-ext/issues"
+    "url": "https://github.com/bytesbrains/pi-project-gate/issues"
   },
   "license": "MIT",
   "main": "./src/index.ts",
